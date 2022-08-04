@@ -2978,6 +2978,21 @@ fn handle_event_loop<T: UserEvent>(
     Event::Opened { urls } => {
       callback(RunEvent::Opened { urls });
     }
+    Event::ApplicationShouldHandleReopen {
+      has_visible_windows,
+      should_handle,
+    } => {
+      let (tx, rx) = channel();
+
+      callback(RunEvent::ApplicationShouldHandleReopen {
+        has_visible_windows,
+        should_handle_tx: tx,
+      });
+
+      if let Ok(false) = rx.try_recv() {
+        *should_handle = false;
+      }
+    }
     _ => (),
   }
 
